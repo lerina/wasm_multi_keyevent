@@ -1,14 +1,10 @@
 use crate::browser::{self, LoopClosure};
 use anyhow::{anyhow, Result};
-use futures::channel::{
-    mpsc::{unbounded, UnboundedReceiver},
-    oneshot::channel,
-};
+use futures::channel::mpsc::{unbounded, UnboundedReceiver};
 
-use std::{cell::RefCell, collections::HashMap, rc::Rc, sync::Mutex};
-use wasm_bindgen::{prelude::Closure, JsCast, JsValue};
-use web_sys::{CanvasRenderingContext2d, };
-
+use std::{cell::RefCell, collections::HashMap, rc::Rc};
+use wasm_bindgen::JsCast;
+use web_sys::CanvasRenderingContext2d;
 
 #[derive(Clone, Copy)]
 pub struct Point {
@@ -30,18 +26,10 @@ pub struct Renderer {
 impl Renderer {
     pub fn clear(&self, rect: &Rect) {
         self.context.set_fill_style(&"rgb(0,0,0)".into());
-        self.context.clear_rect(
-            rect.x.into(),
-            rect.y.into(),
-            rect.width.into(),
-            rect.height.into(),
-        );
-        self.context.fill_rect(
-            rect.x.into(),
-            rect.y.into(),
-            rect.width.into(),
-            rect.height.into(),
-        );
+        self.context
+            .clear_rect(rect.x.into(), rect.y.into(), rect.width.into(), rect.height.into());
+        self.context
+            .fill_rect(rect.x.into(), rect.y.into(), rect.width.into(), rect.height.into());
     }
 
     pub fn set_stroke_style(&self, color: &str) {
@@ -67,7 +55,6 @@ impl Renderer {
     }
 }
 
-
 pub trait Game {
     fn initialize(&self) -> Result<Box<dyn Game>>;
     fn update(&mut self, keystate: &KeyState);
@@ -85,7 +72,7 @@ type SharedLoopClosure = Rc<RefCell<Option<LoopClosure>>>;
 impl GameLoop {
     pub fn start(game: impl Game + 'static) -> Result<()> {
         let mut keyevent_receiver = prepare_input()?;
-        let mut game = game.initialize(); 
+        let mut game = game.initialize();
 
         let mut game_loop = GameLoop {
             last_frame: browser::now()?,
@@ -111,14 +98,12 @@ impl GameLoop {
             game_loop.last_frame = perf;
             game.as_ref().unwrap().draw(&renderer);
 
-            browser::request_animation_frame(f.borrow().as_ref().unwrap());
+            let _ = browser::request_animation_frame(f.borrow().as_ref().unwrap());
         }));
 
-        browser::request_animation_frame(
-            g.borrow()
-                .as_ref()
-                .ok_or_else(|| anyhow!("GameLoop: Loop is None"))?,
-        )?;
+        let _ =
+            browser::request_animation_frame(g.borrow().as_ref().ok_or_else(|| anyhow!("GameLoop: Loop is None"))?)?;
+
         Ok(())
     }
 }
@@ -170,15 +155,11 @@ fn prepare_input() -> Result<UnboundedReceiver<KeyPress>> {
     let keydown_sender = Rc::new(RefCell::new(keydown_sender));
     let keyup_sender = Rc::clone(&keydown_sender);
     let onkeydown = browser::closure_wrap(Box::new(move |keycode: web_sys::KeyboardEvent| {
-        keydown_sender
-            .borrow_mut()
-            .start_send(KeyPress::KeyDown(keycode));
+        let _ = keydown_sender.borrow_mut().start_send(KeyPress::KeyDown(keycode));
     }) as Box<dyn FnMut(web_sys::KeyboardEvent)>);
 
     let onkeyup = browser::closure_wrap(Box::new(move |keycode: web_sys::KeyboardEvent| {
-        keyup_sender
-            .borrow_mut()
-            .start_send(KeyPress::KeyUp(keycode));
+        let _ = keyup_sender.borrow_mut().start_send(KeyPress::KeyUp(keycode));
     }) as Box<dyn FnMut(web_sys::KeyboardEvent)>);
 
     browser::canvas()?.set_onkeydown(Some(onkeydown.as_ref().unchecked_ref()));
@@ -188,4 +169,3 @@ fn prepare_input() -> Result<UnboundedReceiver<KeyPress>> {
 
     Ok(keyevent_receiver)
 }
-

@@ -1,9 +1,6 @@
 use anyhow::Result;
 
-use crate::{
-    browser,
-    engine::{self, Game, KeyState, Point, Rect, Renderer},
-};
+use crate::engine::{Game, KeyState, Point, Rect, Renderer};
 
 pub struct GameObj {
     position: Point,
@@ -18,9 +15,7 @@ impl GameObj {
 }
 
 impl Game for GameObj {
-
     fn initialize(&self) -> Result<Box<dyn Game>> {
-
         Ok(Box::new(GameObj {
             position: self.position,
         }))
@@ -50,7 +45,6 @@ impl Game for GameObj {
 
         self.position.x += velocity.x;
         self.position.y += velocity.y;
-
     }
 
     fn draw(&self, renderer: &Renderer) {
@@ -60,13 +54,11 @@ impl Game for GameObj {
             width: 600.0,
             height: 600.0,
         });
-        
+
         renderer.set_common_style();
         renderer.set_stroke_style("yellow");
         renderer.set_fill_style("black");
         renderer.stroke_rect(self.position.x, self.position.y, 50.0, 50.0);
         renderer.fill_rect(self.position.x, self.position.y, 50.0, 50.0);
-
-    }//^-- draw
+    } //^-- draw
 }
-

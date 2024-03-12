@@ -1,12 +1,8 @@
 use anyhow::{anyhow, Result};
 use std::future::Future;
-use wasm_bindgen::{
-    closure::WasmClosure, closure::WasmClosureFnOnce, prelude::Closure, JsCast, JsValue,
-};
-use wasm_bindgen_futures::JsFuture;
-use web_sys::{
-    CanvasRenderingContext2d, Document, HtmlCanvasElement, Response, Window,
-};
+use wasm_bindgen::{closure::WasmClosure, prelude::Closure, JsCast};
+//use wasm_bindgen_futures::JsFuture;
+use web_sys::{CanvasRenderingContext2d, Document, HtmlCanvasElement, Window};
 
 // Straight taken from https://rustwasm.github.io/book/game-of-life/debugging.html
 macro_rules! log {
@@ -20,9 +16,7 @@ pub fn window() -> Result<Window> {
 }
 
 pub fn document() -> Result<Document> {
-    window()?
-        .document()
-        .ok_or_else(|| anyhow!("No Document Found"))
+    window()?.document().ok_or_else(|| anyhow!("No Document Found"))
 }
 
 pub fn canvas() -> Result<HtmlCanvasElement> {
@@ -42,12 +36,7 @@ pub fn context() -> Result<CanvasRenderingContext2d> {
         .map_err(|js_value| anyhow!("Error getting 2d context {:#?}", js_value))?
         .ok_or_else(|| anyhow!("No 2d context found"))?
         .dyn_into::<web_sys::CanvasRenderingContext2d>()
-        .map_err(|element| {
-            anyhow!(
-                "Error converting {:#?} to CanvasRenderingContext2d",
-                element
-            )
-        })
+        .map_err(|element| anyhow!("Error converting {:#?} to CanvasRenderingContext2d", element))
 }
 
 pub fn spawn_local<F>(future: F)
@@ -68,13 +57,6 @@ pub fn request_animation_frame(callback: &LoopClosure) -> Result<i32> {
         .map_err(|err| anyhow!("Cannot request animation frame {:#?}", err))
 }
 
-pub fn closure_once<F, A, R>(fn_once: F) -> Closure<F::FnMut>
-where
-    F: 'static + WasmClosureFnOnce<A, R>,
-{
-    Closure::once(fn_once)
-}
-
 pub fn closure_wrap<T: WasmClosure + ?Sized>(data: Box<T>) -> Closure<T> {
     Closure::wrap(data)
 }
@@ -85,4 +67,3 @@ pub fn now() -> Result<f64> {
         .ok_or_else(|| anyhow!("Performance object not found"))?
         .now())
 }
-

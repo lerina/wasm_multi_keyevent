@@ -11,22 +11,13 @@ use wasm_bindgen::prelude::*;
 #[wasm_bindgen(start)]
 pub fn main_js() -> Result<(), JsValue> {
     console_error_panic_hook::set_once();
-    /*
-    wasm_bindgen_futures::spawn_local(async move {
-        let game = GameObj::new();
 
-        GameLoop::start(game)
-            .await
-            .expect("Could not start game loop");
-    });
-    */
+    //wasm_bindgen_futures::spawn_local(async move {
     browser::spawn_local(async move {
         let game = GameObj::new();
 
-        GameLoop::start(game)
-            //.await
-            .expect("Could not start game loop");
+        GameLoop::start(game).expect("Could not start game loop");
     });
-    
+
     Ok(())
 }

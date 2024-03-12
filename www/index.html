@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Wasm no NPM no Webpack</title>
+  <style>
+body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0;
+    margin: 0;
+    height: 100vh;
+}
+ </style>
+  <link rel="icon" href="./favicon_96x96.png">
+
+</head>
+<body>
+
+  <canvas id="canvas" style="outline: none" tabindex="0" height="600" width="600">
+    Your browser does not support the Canvas.
+  </canvas>
+    <script type="module">
+      import init from "./pkg/kb.js";
+
+      async function run() {
+        await init();
+      }
+
+      run();
+    </script>
+  <!--script type="module" src="./js/index.js"></script -->
+</body>
+</html>
+
